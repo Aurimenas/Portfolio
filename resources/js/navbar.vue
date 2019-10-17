@@ -1,13 +1,17 @@
 <template>
-    <div class="navb">
-        <div class="navbar-node"><a href="/Shop">shop</a></div>
-        <div class="navbar-node"><a href="/Account">Account</a></div>
-        <a href="/Cart">Cart</a>
-        <a href="/login">Login</a>
-    </div>
+   
+              
+               <ul class="navbar-nav">
+                  <li class="nav-item">
+                   <router-link  class="nav-link" to="/">Shop</router-link>
+                  </li>
+                               
+                 
+             </ul>
+           
 </template>
 <script>
 export default {
-name: 'navbar'
+    name: "navbaras"
 }
 </script>

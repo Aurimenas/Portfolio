@@ -1,13 +1,30 @@
 require('./bootstrap');
 
-window.Vue = require('vue');
+import Vue from 'vue';
+import shopas from './shopas.vue';
+import router from './router.js';
+import navbaras from './navbar.vue';
+import login from './login.vue';
+import log from './log.vue';
+import axios from 'axios';
 
-Vue.component('Shopas',require('./shopas.vue').default);
-Vue.component('Navbar',require('./navbar.vue').default);
+import "chart.js";
+import "hchs-vue-charts";
+Vue.use(window.VueCharts);
+
+
 
 const app = new Vue(
     {
-        el:'#shopas'
-       
+            el:'#shopas',
+            components:
+            {
+                shopas,
+                navbaras,
+                login,
+                log
+            },
+            router 
     }
 );
+       
