@@ -9,3 +9,4 @@ To consider this app fully finished there are few minor details that need to be 
 - Further improve front-end responsive design
 - Implement a function on store's front page to allow users to filter products by their category
 - Improve user-experience by adding input error notifiers to every form (currently only at registration)
+- Switch paypal's sandox mode to live to enable transactions for real(non-sanbox) users
