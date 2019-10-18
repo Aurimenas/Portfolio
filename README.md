@@ -11,3 +11,4 @@ To consider this app fully finished there are few minor details that need to be 
 -Add password encryption and function access checks in controllers!!!!
 
 - In store admin panel's 'Stats' section, add a button to switch datasets(Optional)
+- Add pagination to store management function lists(Optional)
