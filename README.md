@@ -6,7 +6,6 @@ From there the setup is complete, so you can visit your site on the browser and 
 # To-Dos
 To consider this app fully finished there are few minor details that need to be tweaked/optimised:
 - Further improve front-end responsive design
-- Implement a function on store's front page to allow users to filter products by their category
 - Retranslate UI to either full english or full lithuanian instead of a mix 
 
 -Add password encryption and function access checks in controllers!!!!
