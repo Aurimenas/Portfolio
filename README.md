@@ -7,6 +7,6 @@ From there the setup is complete, so you can visit your site on the browser and 
 To consider this app fully finished there are few minor details that need to be tweaked/optimised:
 - Further improve front-end responsive design
 - Implement a function on store's front page to allow users to filter products by their category
-- Improve user-experience by adding input error notifiers to every form (currently only at registration)
 - Retranslate UI to either full english or full lithuanian instead of a mix 
+
 - In store admin panel's 'Stats' section, add a button to switch datasets(Optional)
