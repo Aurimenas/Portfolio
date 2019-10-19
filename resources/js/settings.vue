@@ -1,17 +1,19 @@
 <template>
     <div class="card py-5 text-center">
-        <form class="mx-auto" @submit.prevent="updateSett()">
+        <form class="mx-auto" style="display:block;" @submit.prevent="updateSett()">
             Tax rate applied to your store items( % ):
 <input type="number"  class="form-control text-center" v-model="tax"><br>
 Global discount( % ):
-<input type="number"  class="form-control text-center" v-model="glob"><br>
+<input type="number"  class="form-control text-center" v-model="glob">
+<a style="color:red;display:block;"> {{err1}}</a>
 Carousel #1 ad Display image:<br>
 <input type="file" name="fileToUpload" class="form-control text-center"  @change="onImageChange1" id="fileToUpload"><br>
 Carousel #2 ad Display image:<br>
 <input type="file" name="fileToUpload" class="form-control text-center "  @change="onImageChange2" id="fileToUpload"><br>
 Carousel #3 ad Display image:<br>
 <input type="file" name="fileToUpload" class="form-control0 text-center"  @change="onImageChange3" id="fileToUpload"><br>
-<input type="submit" class="form-control my-1 button btn-success" value="Save settings">
+<a style="color:red;display:block;"> {{err2}}</a>
+<input type="submit" class="form-control my-5 button btn-success" value="Save settings">
             </form>
         </div>
 </template>
@@ -24,7 +26,9 @@ export default {
             glob:0,
             img1:null,
             img2:null,
-            img3:null
+            img3:null,
+            err1:null,
+            err2:null
     }
     },
     created(){
@@ -49,8 +53,10 @@ export default {
                 img2:this.img2,
                 img3:this.img3
             }).then(response=>{
-                this.tax=response.data.settings.tax;
-                this.glob=response.data.settings.globalSale;
+                this.tax=response.data.settings.tax
+                this.glob=response.data.settings.globalSale
+                this.err1=response.data.err1
+                this.err2=response.data.err2
                 console.log(response);
                 
                 })

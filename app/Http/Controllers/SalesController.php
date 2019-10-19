@@ -28,8 +28,8 @@ class SalesController extends Controller
     }
 
     public function stats(){
-   
-       
+        $acc=Accounts::find(session('id'));
+       if($acc->group==="Admin"){
       $revyear=Sales::where([['status','=','1'],['created_at','>',DATE('Y').'-1-1']])->sum('total');
        $revtot=Sales::where('status','=','1')->sum('total');
         $salesyear=Sales::where([['status','=','1'],['created_at','>',DATE('Y').'-1-1']])->count();
@@ -42,6 +42,9 @@ class SalesController extends Controller
         };
    
         return response()->json(['revyear'=>$revyear,'revtot'=>$revtot,'salesyear'=>$salesyear,'salestot'=>$salestot,'month'=>$monthcount]);
+        }else{
+            return redirect(url('/'));
+        };
     }
  
 }

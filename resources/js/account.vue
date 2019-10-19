@@ -1,19 +1,20 @@
 <template>
 <div class="d-flex m-5 py-3 align-items-center flex-cont text-center card">
-    <form class="" @submit.prevent="send()">
+    <form class="mx-auto" @submit.prevent="send()">
         <strong>Your username</strong> <br>
-        <input type="text" class="form-control text-center"  v-bind:style="{border:BC}" v-model="usn"><br>
-        <div v-if="err1!==null" style="color:red;">{{err1}} </div>
+        <input type="text" style="min-width:350px;" class="form-control text-center"  v-bind:style="{border:BC}" v-model="usn">
+        <a style="color:red;">{{err1}} </a><br>
         <strong>Your current password </strong><br>
-        <input type="password" class="form-control text-center" v-bind:style="{border:BCog}" v-model="og" ><br>
-         <div v-if="err2!==null" style="color:red;">{{err2}} </div>
+        <input type="password" class="form-control text-center" v-bind:style="{border:BCog}" v-model="og" >
+         <a style="color:red;">{{err2}} </a><br>
         <strong>Your new password</strong> <br>
-        <input type="password" class="form-control text-center" v-bind:style="{border:BCp1}" v-model="pwd1"><br>
-         <div v-if="err3!==null" style="color:red;">{{err3}} </div>
+        <input type="password" class="form-control text-center" v-bind:style="{border:BCp1}" v-model="pwd1">
+         <a style="color:red;">{{err3}} </a><br>
         <strong>Repeat your new password</strong> <br>
-        <input type="password" class="form-control text-center" v-bind:style="{border:BCp2}" v-model="pwd2"> <br>
-         <div v-if="err4!==null" style="color:red;">{{err4}} </div>
-      <input type="submit" class="form-control button btn-success" v-bind:disabled="but" value="Issaugoti">
+        <input type="password" class="form-control text-center" v-bind:style="{border:BCp2}" v-model="pwd2"> 
+         <a style="color:red;">{{err4}} </a><br><br>
+      <input type="submit" class="form-control button btn-success" v-bind:disabled="but" value="Issaugoti"><br>
+       <a style="color:green;">{{err5}}</a>
     
     </form>
     </div>
@@ -40,7 +41,9 @@ name:"acc",
     }
 },
 created(){
-this.receive();
+
+this.receive()
+
 },
 watch:{
         usn(){
@@ -81,7 +84,7 @@ watch:{
                 this.err2=null;
             } else{//red border
                 this.BCog="solid 2px red";
-                this.err2="Your username must be at least 5 characters long";
+                this.err2="Your password must be at least 5 characters long";
             };
             this.AllFilled();
         }
@@ -97,11 +100,11 @@ methods:{
            // .then(response=>response.json())       
             .then(response=> {
                console.log(response);
-           //  this.err1=response.err1; //empty usn or taken usn
-           //   this.err2=response.err2; //empty pwd or wrong pwd
-            //   this.err3=response.err3; //empty pwd1 
-           //     this.err4=response.err4; //empty pwd2 or doesnt match
-           //     this.err5=response.err5; //success mesage
+             this.err1=response.data.err1 //empty usn or taken usn
+              this.err2=response.data.err2 //empty pwd or wrong pwd
+               this.err3=response.data.err3 //empty pwd1 
+                this.err4=response.data.err4 //empty pwd2 or doesnt match
+                this.err5=response.data.err5 //success mesage
             })
             .catch((e) => {
                 console.error(e)

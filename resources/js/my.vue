@@ -11,6 +11,7 @@
             </tr>
             </thead>
             <tbody>
+              
         <tr v-for="item in itemai" :key="item.id">          
               
                 <td>{{item.created_at}}</td>
@@ -19,6 +20,11 @@
                 <td>{{item.address}}</td>
                 <td>{{item.total}} €</td>
                 </tr> 
+                
+                    <tr v-show="itemai[0]==null">
+                        <td colspan="5"> You haven't made any purchases yet</td>
+                        </tr>
+                  
         
               </tbody>
             </table>

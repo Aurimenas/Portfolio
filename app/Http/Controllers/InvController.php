@@ -8,6 +8,7 @@ use App\Inventory;
 use App\Cart;
 use App\Http\Resources\InvRes;
 use Image;
+use App\Settings;
 
 class InvController extends Controller
 {
@@ -21,11 +22,26 @@ class InvController extends Controller
         $inv=Inventory::where('active','=','1')->get();
         return InvRes::collection($inv);
      }
-    public function give()
+    public function give(request $request)
     {
         //full list of all the items availabl in the store
-        $inv=Inventory::where('active','=','1')->paginate(6);
-        return InvRes::collection($inv);
+        $cat=$request->input('cat');
+        $debug=$cat;
+        if($cat==='child'){
+            $inv=Inventory::where([['active','=','1'],['children','=','1']])->paginate(6);
+            
+        }elseif($cat==='Mens'){
+            $inv=Inventory::where([['active','=','1'],['mens','=','1']])->paginate(6);
+        }elseif($cat==="Womens"){
+            $inv=Inventory::where([['active','=','1'],['womens','=','1']])->paginate(6);
+        }else{
+            $inv=Inventory::where('active','=','1')->paginate(6);
+        };
+        
+        //return InvRes::collection($inv);
+        $tax=Settings::find(1)->tax;
+        $sale=Settings::find(1)->globalSale;
+        return response()->json(['data'=>$inv,'tax'=>$tax,'sale'=>$sale,'debug'=>$debug]);
 
     }
 
@@ -43,7 +59,9 @@ class InvController extends Controller
         if(Cart::where([['user_id','=',session('id')],['product_id','=',$id]])->first()){
             $err3="Sorry, you already have it in your cart";
         };
-        return response()->json(['inv'=>$inv,'err3'=>$err3]);
+        $tax=Settings::find(1)->tax;
+        $sale=Settings::find(1)->globalSale;
+        return response()->json(['inv'=>$inv,'err3'=>$err3,'tax'=>$tax,'sale'=>$sale]);
     }
 
     /**
@@ -88,8 +106,8 @@ class InvController extends Controller
             
         };
         if(empty($name)){
-            //$err1="Your name is left empty";
-            $err1=$request->input('img');
+            $err1="Your product name is left empty";
+        
         };
         if(empty($price) or $price<0){
             $err2="Your specified price input is not valid";
@@ -135,6 +153,7 @@ class InvController extends Controller
         $err1=null;
         $err2=null;
         $err3=null;
+        $err4=null;
         $err5=null;
         if(strlen($name)<5 OR Inventory::where([['id','!=',$itemid],['name','=',$name]])->first()){
             $err1="Product name is too short or already in use";
@@ -142,12 +161,15 @@ class InvController extends Controller
         if(strlen($desc)<5){
             $err2="Please describe the product";
         };
-        if($err1===null && $err2===null){
+        if(strlen($price)<5 OR $price<0){
+            $err4="Please specify a valid price";
+        };
+        if($err1===null && $err2===null && $err4===null){
         $itemas=Inventory::find($itemid);
         if($img!==null){
             $expl1=explode(',',$img);
             if(!strpos($expl1[0],'image')){
-                $err5="File1's format is not accptable";
+                $err3="File1's format is not accptable";
             }else{
                 $img1=base64_decode($expl1[1]);
                 $filename1=$itemas->picture;
@@ -163,20 +185,23 @@ class InvController extends Controller
         $itemas->womens=$womens;
         $itemas->children=$children;
         $itemas->save();
-        $err3="Success";
+        $err5="Success";
         };
 
-        return response()->json(['err1'=>$err1,'err2'=>$err2,'err3'=>$err3]);
+        return response()->json(['err1'=>$err1,'err2'=>$err2,'err3'=>$err3,'err4'=>$err4,'err5'=>$err5]);
     }
 
     public function plusminus(request $request, $id){
         $plus=$request->input('plus');
         $minus=$request->input('minus');
         $item=Inventory::find($id);
+        $msg="Please specify valid number values";
         if($plus>=0 && $minus>=0){
             $item->quantity=$item->quantity+$plus-$minus;
             $item->save();
+            $msg="Stock updated";
         };
+        return response()->json(['msg'=>$msg]);
     }
 
     public function remove(request $request, $id){

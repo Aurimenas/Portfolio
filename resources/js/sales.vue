@@ -8,10 +8,14 @@
             <th>Product name</th> 
             <th>Quantity</th>
             <th>Shipping address</th>
-            <th>Ordered by</th>
+            <th>Ordered by user</th>
+            <th> Recipient's name </th>
             </tr>
             </thead>
             <tbody>
+                <tr v-show="sales[0]==null">
+                        <td colspan="7"> There haven't been any purchases yet </td>
+                        </tr>
         <tr v-for="order in sales" :key="order.id">          
               
                 <td>{{order.created_at}}</td>
@@ -20,6 +24,7 @@
                 <td>{{order.quantity}}</td>
                 <td>{{order.address}}</td>
                 <td>{{order.account.usn}}</td>
+                <td>{{order.Ship_name}}</td>
                 </tr> 
         
               </tbody>

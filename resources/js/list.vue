@@ -8,7 +8,7 @@
             <th>Mens</th>
             <th>Womens</th>
             <th>Children</th>
-            <th>Price</th>
+            <th>Base price</th>
             <th> Functions</th>
             </tr>
             </thead>
@@ -28,11 +28,11 @@
                 </tr> <tr v-show="showup==item.id"><td colspan="7">
       <form class="text-center" @submit.prevent="updatedis(index)">
           Name
-<input class="form-control text-center mx-auto w-50" v-model="item.name" type="text">
-Price (€)
-<input class="form-control text-center mx-auto w-50"  v-model="item.price" type="number" step="0.01">
+<input class="form-control text-center mx-auto w-50" v-model="item.name" type="text"><a style="color:red;display:block;"> {{err1}}</a>
+Base price (€)
+<input class="form-control text-center mx-auto w-50"  v-model="item.price" type="number" step="0.01"><a style="color:red;display:block;"> {{err4}}</a>
 Description
-<input class="form-control text-center mx-auto w-50"  v-model="item.desc" type="text">
+<input class="form-control text-center mx-auto w-50"  v-model="item.desc" type="text"><a style="color:red;display:block;"> {{err2}}</a>
 <div class="d-inline-flex ">
     <div clas="align-items-center" style="margin:5px 15px;">
 Mens
@@ -47,14 +47,15 @@ Children
 <input class="form-control"  v-model="item.children" :true-value="1" :false-value="0" type="checkbox">
 </div>
 </div><br>
-<input type="file" class="form-control mx-auto w-50"  @change="imgfunc"><br>
-<input type="submit" class="form-control mx-auto button btn-success" style="width:100px;" value="Issaugoti"><br>
+<input type="file" class="form-control mx-auto w-50"  @change="imgfunc"><a style="color:red;display:block;"> {{err3}}</a>
+<input type="submit" class="form-control mx-auto my-5 button btn-success" style="width:100px;" value="Issaugoti"><br>
           </form> <br><div class="d-flex flex-container justify-content-center"><br>
           <form class="text-center" @submit.prevent="PlusMinus(item.id)">
-              Dabartinis kiekis: {{item.quantity}}<br>
-Prideti:<input type="number" class="form-control" v-model="plus"><br>
-Atimti:<input type="number" class=" form-control" v-model="minus"><br>
-<input type="submit" class="button form-control btn-success" value="Modifikuoti kieki">
+              Current stock: {{item.quantity}}<br>
+Increase by:<input type="number" class="form-control" v-model="plus"><br>
+Decrease by:<input type="number" class=" form-control" v-model="minus"><a v-if="errstock=='Stock updated'" style="color:green;display:block;"> {{errstock}}</a>
+<a v-else style="color:red;display:block;"> {{errstock}}</a>
+<input type="submit" class="button form-control my-3 btn-success" value="Modify stock">
               </form>
               </div>
   </td>
@@ -76,11 +77,17 @@ export default {
     data(){
         return{
             items:[],
-            err1:null,
             showup:null,
             plus:0,
             minus:0,
-            img:null
+            img:null,
+            err:null,
+            err1:null,
+            err2:null,
+            err3:null,
+            err4:null,
+            err6:null,
+            errstock:null
             
         }
     },
@@ -105,7 +112,7 @@ export default {
                 console.log(response);
                 this.items=response.data;
                 if(response.data===null){
-                    this.err1="There are no items in the store yet!";
+                    this.err="There are no items in the store yet!";
                 };
             })
             .catch(error=>{
@@ -142,6 +149,10 @@ export default {
            //.then(response=>response.json())
             .then(response=>{
                 console.log(response)
+                this.err1=response.data.err1
+                this.err2=response.data.err2
+                this.err3=response.data.err3
+                this.err4=response.data.err4
             })
             .catch(error=>{
                 console.log(error)
@@ -151,7 +162,7 @@ export default {
           axios.put('api/remove/'+id)
         .then(response=>{
             console.log(response)
-            this.err1=response.err1
+            this.err6=response.err1
             this.fetchInv()
         })
     },
@@ -161,8 +172,13 @@ export default {
            minus:this.minus
        })
        .then(response=>{
-           console.log(response);
-       }).finally(this.fetchInv())
+           console.log(response)
+           this.errstock=response.data.msg
+           if(response.data.msg==="Stock updated"){
+               this.fetchInv()
+           
+           }
+       })
     }
     }
 }

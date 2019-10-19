@@ -23,7 +23,7 @@ route::get('/logout','logincontroller@logout');
 
 route::post('/register','logincontroller@register');
 
-route::get('/inventory','InvController@give');
+route::post('/inventorycat','InvController@give');
 route::get('/inventory/{id}','InvController@one');
 //takes data for a new inventory record
 route::post('/inventory','InvController@new');
@@ -72,8 +72,11 @@ route::put('/cartminus','CartController@minus');
 route::delete('/cartdel/{id}','CartController@delete');
 
 //Route to get stats about sales for stats chart basically
+
 route::post('/stats','SalesController@stats');
 
 //non paginated full list of items
 
 route::get('/inventoryfull','InvController@full');
+
+route::post('/auth','logincontroller@auth');

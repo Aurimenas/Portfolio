@@ -82,11 +82,11 @@ export default {
   },
   methods:{
     redir(){
-             window.location.href = '/portfolio/public/';
+             window.location.href = '';
         },
         newReg(){
              axios.post('api/register', {
-            usn: this.usn1,
+            usn: this.usn,
             pwd1: this.pwd1,
             pwd2: this.pwd2
             })

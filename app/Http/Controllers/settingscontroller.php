@@ -9,12 +9,14 @@ use Illuminate\Support\Facades\Artisan;
 class settingscontroller extends Controller
 {
     public function home(){
+		//return public_path();
         if(file_exists(public_path('/storage/img'))){
         return view('welcome');
         }else{
+			//symlink(public_path(),'storage/app/public');
             Artisan::call('storage:link'); //If this happens to be the first visit, it should generate a sym-link between storage and public dirs to access media
             return view('welcome');
-        }
+        };
     }
     public function save(request $request){
         $tax=$request->input('tax');
@@ -79,9 +81,9 @@ class settingscontroller extends Controller
             $settings=new Settings;
             $settings->tax=0;
             $settings->globalSale=0;
-            $settings->car1="image1.jpg";
-            $settings->car2="image2.jpg";
-            $settings->car3="image3.jpg";
+            $settings->car1="carousel1.png";
+            $settings->car2="carousel2.png";
+            $settings->car3="carousel3.png";
             $settings->save();
             return response()->json(['settings'=>$settings]);
         };

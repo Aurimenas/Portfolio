@@ -1858,6 +1858,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "acc",
   data: function data() {
@@ -1934,7 +1935,7 @@ __webpack_require__.r(__webpack_exports__);
       } else {
         //red border
         this.BCog = "solid 2px red";
-        this.err2 = "Your username must be at least 5 characters long";
+        this.err2 = "Your password must be at least 5 characters long";
       }
 
       ;
@@ -1943,6 +1944,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     send: function send() {
+      var _this = this;
+
       axios.put('api/account', {
         usn: this.usn,
         pwd1: this.pwd1,
@@ -1950,23 +1953,28 @@ __webpack_require__.r(__webpack_exports__);
         ogpwd: this.og
       }) // .then(response=>response.json())       
       .then(function (response) {
-        console.log(response); //  this.err1=response.err1; //empty usn or taken usn
-        //   this.err2=response.err2; //empty pwd or wrong pwd
-        //   this.err3=response.err3; //empty pwd1 
-        //     this.err4=response.err4; //empty pwd2 or doesnt match
-        //     this.err5=response.err5; //success mesage
+        console.log(response);
+        _this.err1 = response.data.err1; //empty usn or taken usn
+
+        _this.err2 = response.data.err2; //empty pwd or wrong pwd
+
+        _this.err3 = response.data.err3; //empty pwd1 
+
+        _this.err4 = response.data.err4; //empty pwd2 or doesnt match
+
+        _this.err5 = response.data.err5; //success mesage
       })["catch"](function (e) {
         console.error(e);
       });
     },
     receive: function receive() {
-      var _this = this;
+      var _this2 = this;
 
       fetch('api/account').then(function (response) {
         return response.json();
       }).then(function (response) {
         console.log(response);
-        _this.usn = response.usn;
+        _this2.usn = response.usn;
       })["catch"](function (error) {
         console.error(error);
       });
@@ -2039,6 +2047,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 
@@ -2058,8 +2067,20 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      component: 'stats'
+      component: 'stats',
+      au: false
     };
+  },
+  created: function created() {
+    var _this = this;
+
+    axios.post('api/auth').then(function (response) {
+      if (response.data.re === "Authenticated") {
+        _this.au = true;
+      } else {
+        window.location.href = '';
+      }
+    });
   }
 });
 
@@ -2117,7 +2138,9 @@ __webpack_require__.r(__webpack_exports__);
     return {
       itemai: [],
       button: [],
-      total: 0
+      total: 0,
+      sale: 0,
+      tax: 0
     };
   },
   created: function created() {
@@ -2134,7 +2157,9 @@ __webpack_require__.r(__webpack_exports__);
         //  .then(text=>{
         //  console.log(text)
         console.log(response.data);
-        _this.itemai = response.data;
+        _this.itemai = response.cart;
+        _this.tax = response.tax;
+        _this.sale = response.sale;
 
         _this.calctotal();
       })["catch"](function (e) {
@@ -2183,10 +2208,10 @@ __webpack_require__.r(__webpack_exports__);
       var tot = 0;
 
       for (var i = 0; i < this.itemai.length; i++) {
-        tot = tot + this.itemai[i].quantity * this.itemai[i].product.price;
+        tot = tot + this.itemai[i].quantity * this.itemai[i].product.price * (1 + 0.01 * this.tax) * (1 - 0.01 * this.sale);
       }
 
-      this.total = tot;
+      this.total = Number(tot).toFixed(2);
     }
   }
 });
@@ -2242,7 +2267,9 @@ __webpack_require__.r(__webpack_exports__);
       but: false,
       err1: null,
       err2: null,
-      err3: ''
+      err3: '',
+      tax: 0,
+      sale: 0
     };
   },
   created: function created() {
@@ -2265,6 +2292,8 @@ __webpack_require__.r(__webpack_exports__);
         console.log(response);
         _this.item = response.inv;
         _this.err3 = response.err3;
+        _this.tax = response.tax;
+        _this.sale = response.sale;
       })["catch"](function (e) {
         console.error(e);
       });
@@ -2380,16 +2409,23 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "list",
   data: function data() {
     return {
       items: [],
-      err1: null,
       showup: null,
       plus: 0,
       minus: 0,
-      img: null
+      img: null,
+      err: null,
+      err1: null,
+      err2: null,
+      err3: null,
+      err4: null,
+      err6: null,
+      errstock: null
     };
   },
   created: function created() {
@@ -2420,7 +2456,7 @@ __webpack_require__.r(__webpack_exports__);
         _this2.items = response.data;
 
         if (response.data === null) {
-          _this2.err1 = "There are no items in the store yet!";
+          _this2.err = "There are no items in the store yet!";
         }
 
         ;
@@ -2442,6 +2478,8 @@ __webpack_require__.r(__webpack_exports__);
       ;
     },
     updatedis: function updatedis(idd) {
+      var _this3 = this;
+
       // console.log(this.items[id-1].womens);
       axios.put('api/inventory', {
         name: this.items[idd].name,
@@ -2459,27 +2497,38 @@ __webpack_require__.r(__webpack_exports__);
       //.then(response=>response.json())
       .then(function (response) {
         console.log(response);
+        _this3.err1 = response.data.err1;
+        _this3.err2 = response.data.err2;
+        _this3.err3 = response.data.err3;
+        _this3.err4 = response.data.err4;
       })["catch"](function (error) {
         console.log(error);
       });
     },
     purge: function purge(id) {
-      var _this3 = this;
+      var _this4 = this;
 
       axios.put('api/remove/' + id).then(function (response) {
         console.log(response);
-        _this3.err1 = response.err1;
+        _this4.err6 = response.err1;
 
-        _this3.fetchInv();
+        _this4.fetchInv();
       });
     },
     PlusMinus: function PlusMinus(id) {
+      var _this5 = this;
+
       axios.put('api/plusminus/' + id, {
         plus: this.plus,
         minus: this.minus
       }).then(function (response) {
         console.log(response);
-      })["finally"](this.fetchInv());
+        _this5.errstock = response.data.msg;
+
+        if (response.data.msg === "Stock updated") {
+          _this5.fetchInv();
+        }
+      });
     }
   }
 });
@@ -2495,6 +2544,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
 //
 //
 //
@@ -2546,9 +2596,11 @@ __webpack_require__.r(__webpack_exports__);
       if (this.usn.length >= 5) {
         //black border
         this.BC = "solid 2px black";
+        this.err1 = null;
       } else {
         //red border
         this.BC = "solid 2px red";
+        this.err1 = "Your username must be at least 5 characters long";
       }
 
       ;
@@ -2565,9 +2617,11 @@ __webpack_require__.r(__webpack_exports__);
       if (this.pwd.length >= 5) {
         //black border
         this.BCp = "solid 2px black";
+        this.err3 = null;
       } else {
         //red border
         this.BCp = "solid 2px red";
+        this.err3 = "Your password must be at least 5 characters long";
       }
 
       ;
@@ -2590,13 +2644,13 @@ __webpack_require__.r(__webpack_exports__);
         pwd: this.pwd
       }).then(function (response) {
         _this.err1 = response.data.err1;
-        _this.err2 = response.data.err2;
+        _this.err3 = response.data.err2;
         _this.err3 = response.data.err3;
-        _this.err4 = response.data.err4;
+        _this.err1 = response.data.err4;
         console.log(_this.err4);
 
         if (response.data.err5 !== null) {
-          window.location.href = '/portfolio/public/';
+          window.location.href = '';
         }
 
         ;
@@ -2605,7 +2659,7 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     redir: function redir() {
-      window.location.href = '/portfolio/public/';
+      window.location.href = '';
     }
   }
 });
@@ -2668,6 +2722,12 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2802,6 +2862,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "newprod",
   data: function data() {
@@ -2813,11 +2877,18 @@ __webpack_require__.r(__webpack_exports__);
       price: 0,
       name: '',
       quant: 0,
-      image: null
+      image: null,
+      err1: null,
+      err2: null,
+      err3: null,
+      err4: null,
+      errimg: null
     };
   },
   methods: {
     submitas: function submitas() {
+      var _this = this;
+
       axios.post('api/inventory', {
         price: this.price,
         name: this.name,
@@ -2830,10 +2901,15 @@ __webpack_require__.r(__webpack_exports__);
       }) //.then(response=>response.json())
       .then(function (response) {
         console.log(response);
+        _this.err1 = response.data.err1;
+        _this.err2 = response.data.err2;
+        _this.err3 = response.data.err3;
+        _this.err4 = response.data.err4;
+        _this.errimg = response.data.errimg;
       });
     },
     onImageChange: function onImageChange(e) {
-      var _this = this;
+      var _this2 = this;
 
       var file = e.target.files[0];
       console.log(e.target.files[0]);
@@ -2841,7 +2917,7 @@ __webpack_require__.r(__webpack_exports__);
 
       reader.onload = function (file) {
         console.log('RESULT:', reader.result);
-        _this.image = reader.result;
+        _this2.image = reader.result;
       };
 
       reader.readAsDataURL(file);
@@ -2968,13 +3044,13 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     redir: function redir() {
-      window.location.href = '/portfolio/public/';
+      window.location.href = '';
     },
     newReg: function newReg() {
       var _this = this;
 
       axios.post('api/register', {
-        usn: this.usn1,
+        usn: this.usn,
         pwd1: this.pwd1,
         pwd2: this.pwd2
       }).then(function (response) {
@@ -3017,6 +3093,11 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
 //
 //
 //
@@ -3114,6 +3195,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "settings",
   data: function data() {
@@ -3122,7 +3205,9 @@ __webpack_require__.r(__webpack_exports__);
       glob: 0,
       img1: null,
       img2: null,
-      img3: null
+      img3: null,
+      err1: null,
+      err2: null
     };
   },
   created: function created() {
@@ -3152,6 +3237,8 @@ __webpack_require__.r(__webpack_exports__);
       }).then(function (response) {
         _this2.tax = response.data.settings.tax;
         _this2.glob = response.data.settings.globalSale;
+        _this2.err1 = response.data.err1;
+        _this2.err2 = response.data.err2;
         console.log(response);
       });
     },
@@ -3302,55 +3389,58 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: "shopas",
   data: function data() {
     return {
       items: [],
-      item: {
-        id: '',
-        name: '',
-        mens: '',
-        womens: '',
-        children: '',
-        price: '',
-        quantity: '',
-        picture: '',
-        desc: '',
-        created_at: '',
-        updated_at: ''
-      },
       pagenum: 1,
-      links: [],
-      meta: [],
       total: 1,
       butP: true,
       butN: true,
       nexturl: null,
       prevurl: null,
       lasturl: null,
-      firsturl: null
+      firsturl: null,
+      tax: 0,
+      sale: 0,
+      cat: 'All'
     };
   },
+  watch: {
+    cat: function cat() {
+      this.getinv('api/inventorycat', this.cat);
+    }
+  },
   created: function created() {
-    this.getinv('api/inventory');
+    this.getinv('api/inventorycat', this.cat);
   },
   methods: {
-    getinv: function getinv(url) {
+    getinv: function getinv(url, categ) {
       var _this = this;
 
-      fetch(url).then(function (response) {
-        return response.json();
-      }).then(function (response) {
+      axios.post(url, {
+        cat: categ
+      }) // .then(response=>response.json())
+      .then(function (response) {
         console.log(response);
-        _this.items = response.data;
-        _this.links = response.links;
-        _this.pagenum = response.meta.current_page;
-        _this.total = response.meta.total;
-        _this.nexturl = response.links.next;
-        _this.prevurl = response.links.prev;
-        _this.lasturl = response.links.last;
-        _this.firsturl = response.links.first;
+        _this.items = response.data.data.data;
+        _this.pagenum = response.data.data.current_page;
+        _this.total = response.data.data.total;
+        _this.nexturl = response.data.data.next_page_url;
+        _this.prevurl = response.data.data.prev_page_url;
+        _this.lasturl = response.data.data.last_page_url;
+        _this.firsturl = response.data.data.first_page_url;
+        _this.tax = response.data.tax;
+        _this.sale = response.data.sale;
 
         if (_this.nexturl === null) {
           _this.butN = true;
@@ -3369,23 +3459,23 @@ __webpack_require__.r(__webpack_exports__);
     },
     Change: function Change() {
       if (this.pagenum < 1) {
-        this.getinv(this.firsturl);
+        this.getinv(this.firsturl, this.cat);
       } else if (this.pagenum > this.total) {
-        this.getinv(this.lasturl);
+        this.getinv(this.lasturl, this.cat);
       } else {
-        this.getinv('api/inventory?page=' + this.pagenum);
+        this.getinv('api/inventorycat?page=' + this.pagenum, this.cat);
       }
     },
     Prev: function Prev() {
       if (this.prevurl !== null) {
         //verification if client removes "disabled" attribute from the button
-        this.getinv(this.prevurl);
+        this.getinv(this.prevurl, this.cat);
       }
     },
     Next: function Next() {
       if (this.nexturl !== null) {
         //verification if client removes "disabled" attribute from the button
-        this.getinv(this.nexturl);
+        this.getinv(this.nexturl, this.cat);
       }
     }
   }
@@ -53441,6 +53531,7 @@ var render = function() {
       _c(
         "form",
         {
+          staticClass: "mx-auto",
           on: {
             submit: function($event) {
               $event.preventDefault()
@@ -53463,6 +53554,7 @@ var render = function() {
               }
             ],
             staticClass: "form-control text-center",
+            staticStyle: { "min-width": "350px" },
             style: { border: _vm.BC },
             attrs: { type: "text" },
             domProps: { value: _vm.usn },
@@ -53475,13 +53567,11 @@ var render = function() {
               }
             }
           }),
-          _c("br"),
           _vm._v(" "),
-          _vm.err1 !== null
-            ? _c("div", { staticStyle: { color: "red" } }, [
-                _vm._v(_vm._s(_vm.err1) + " ")
-              ])
-            : _vm._e(),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(_vm._s(_vm.err1) + " ")
+          ]),
+          _c("br"),
           _vm._v(" "),
           _c("strong", [_vm._v("Your current password ")]),
           _c("br"),
@@ -53508,13 +53598,11 @@ var render = function() {
               }
             }
           }),
-          _c("br"),
           _vm._v(" "),
-          _vm.err2 !== null
-            ? _c("div", { staticStyle: { color: "red" } }, [
-                _vm._v(_vm._s(_vm.err2) + " ")
-              ])
-            : _vm._e(),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(_vm._s(_vm.err2) + " ")
+          ]),
+          _c("br"),
           _vm._v(" "),
           _c("strong", [_vm._v("Your new password")]),
           _vm._v(" "),
@@ -53542,13 +53630,11 @@ var render = function() {
               }
             }
           }),
-          _c("br"),
           _vm._v(" "),
-          _vm.err3 !== null
-            ? _c("div", { staticStyle: { color: "red" } }, [
-                _vm._v(_vm._s(_vm.err3) + " ")
-              ])
-            : _vm._e(),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(_vm._s(_vm.err3) + " ")
+          ]),
+          _c("br"),
           _vm._v(" "),
           _c("strong", [_vm._v("Repeat your new password")]),
           _vm._v(" "),
@@ -53577,18 +53663,21 @@ var render = function() {
             }
           }),
           _vm._v(" "),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(_vm._s(_vm.err4) + " ")
+          ]),
           _c("br"),
-          _vm._v(" "),
-          _vm.err4 !== null
-            ? _c("div", { staticStyle: { color: "red" } }, [
-                _vm._v(_vm._s(_vm.err4) + " ")
-              ])
-            : _vm._e(),
+          _c("br"),
           _vm._v(" "),
           _c("input", {
             staticClass: "form-control button btn-success",
             attrs: { type: "submit", disabled: _vm.but, value: "Issaugoti" }
-          })
+          }),
+          _c("br"),
+          _vm._v(" "),
+          _c("a", { staticStyle: { color: "green" } }, [
+            _vm._v(_vm._s(_vm.err5))
+          ])
         ]
       )
     ]
@@ -53616,149 +53705,151 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      staticClass: "row ml-2 my-3",
-      staticStyle: { height: "100vh", "min-width": "525px" }
-    },
-    [
-      _c(
+  return _vm.au === true
+    ? _c(
         "div",
         {
-          staticClass: "col-2 text-center rounded mr-2",
-          staticStyle: {
-            "background-color": "white",
-            "min-height": "80%",
-            "min-width": "120px",
-            border: "solid 2px #0a0a29",
-            "border-radius": "2px"
-          }
+          staticClass: "row ml-2 my-3",
+          staticStyle: { height: "100vh", "min-width": "525px" }
         },
         [
-          _c("br"),
-          _c("strong", { staticStyle: { "font-size": "25px" } }, [
-            _vm._v("Control Panel")
-          ]),
-          _c("br"),
-          _c("hr", {
-            staticStyle: {
-              "background-color": "#141452",
-              height: "2px",
-              "border-radius": "2px"
-            }
-          }),
-          _vm._v(" "),
-          _c("div", { staticClass: " text-center" }, [
-            _c(
-              "button",
-              {
-                staticClass: "form-control",
-                staticStyle: { border: "none" },
-                attrs: { type: " row button" },
-                on: {
-                  click: function($event) {
-                    _vm.component = "stats"
-                  }
+          _c(
+            "div",
+            {
+              staticClass: "col-2 text-center rounded mr-2",
+              staticStyle: {
+                "background-color": "white",
+                "min-height": "80%",
+                "min-width": "120px",
+                border: "solid 2px #0a0a29",
+                "border-radius": "2px"
+              }
+            },
+            [
+              _c("br"),
+              _c("strong", { staticStyle: { "font-size": "25px" } }, [
+                _vm._v("Control Panel")
+              ]),
+              _c("br"),
+              _c("hr", {
+                staticStyle: {
+                  "background-color": "#141452",
+                  height: "2px",
+                  "border-radius": "2px"
                 }
-              },
-              [_c("strong", [_vm._v("Stats")])]
-            ),
-            _c("hr", {
-              staticStyle: { "background-color": "#33ccff", height: "1px" }
-            })
-          ]),
+              }),
+              _vm._v(" "),
+              _c("div", { staticClass: " text-center" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "form-control",
+                    staticStyle: { border: "none" },
+                    attrs: { type: " row button" },
+                    on: {
+                      click: function($event) {
+                        _vm.component = "stats"
+                      }
+                    }
+                  },
+                  [_c("strong", [_vm._v("Stats")])]
+                ),
+                _c("hr", {
+                  staticStyle: { "background-color": "#33ccff", height: "1px" }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: " text-center" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "form-control",
+                    staticStyle: { border: "none" },
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        _vm.component = "sales"
+                      }
+                    }
+                  },
+                  [_c("strong", [_vm._v("Sales")])]
+                ),
+                _c("hr", {
+                  staticStyle: { "background-color": "#33ccff", height: "1px" }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: " text-center" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "form-control",
+                    staticStyle: { border: "none" },
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        _vm.component = "newprod"
+                      }
+                    }
+                  },
+                  [_c("strong", [_vm._v(" New product")])]
+                ),
+                _c("hr", {
+                  staticStyle: { "background-color": "#33ccff", height: "1px" }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: " text-center" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "form-control",
+                    staticStyle: { border: "none" },
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        _vm.component = "list"
+                      }
+                    }
+                  },
+                  [_c("strong", [_vm._v("Manage products")])]
+                ),
+                _c("hr", {
+                  staticStyle: { "background-color": "#33ccff", height: "1px" }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: " text-center" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "form-control",
+                    staticStyle: { border: "none" },
+                    attrs: { type: "button" },
+                    on: {
+                      click: function($event) {
+                        _vm.component = "settings"
+                      }
+                    }
+                  },
+                  [_c("strong", [_vm._v("Store settings")])]
+                ),
+                _c("hr", {
+                  staticStyle: { "background-color": "#33ccff", height: "1px" }
+                })
+              ])
+            ]
+          ),
           _vm._v(" "),
-          _c("div", { staticClass: " text-center" }, [
-            _c(
-              "button",
-              {
-                staticClass: "form-control",
-                staticStyle: { border: "none" },
-                attrs: { type: "button" },
-                on: {
-                  click: function($event) {
-                    _vm.component = "sales"
-                  }
-                }
-              },
-              [_c("strong", [_vm._v("Sales")])]
-            ),
-            _c("hr", {
-              staticStyle: { "background-color": "#33ccff", height: "1px" }
-            })
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: " text-center" }, [
-            _c(
-              "button",
-              {
-                staticClass: "form-control",
-                staticStyle: { border: "none" },
-                attrs: { type: "button" },
-                on: {
-                  click: function($event) {
-                    _vm.component = "newprod"
-                  }
-                }
-              },
-              [_c("strong", [_vm._v(" New product")])]
-            ),
-            _c("hr", {
-              staticStyle: { "background-color": "#33ccff", height: "1px" }
-            })
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: " text-center" }, [
-            _c(
-              "button",
-              {
-                staticClass: "form-control",
-                staticStyle: { border: "none" },
-                attrs: { type: "button" },
-                on: {
-                  click: function($event) {
-                    _vm.component = "list"
-                  }
-                }
-              },
-              [_c("strong", [_vm._v("Manage products")])]
-            ),
-            _c("hr", {
-              staticStyle: { "background-color": "#33ccff", height: "1px" }
-            })
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: " text-center" }, [
-            _c(
-              "button",
-              {
-                staticClass: "form-control",
-                staticStyle: { border: "none" },
-                attrs: { type: "button" },
-                on: {
-                  click: function($event) {
-                    _vm.component = "settings"
-                  }
-                }
-              },
-              [_c("strong", [_vm._v("Store settings")])]
-            ),
-            _c("hr", {
-              staticStyle: { "background-color": "#33ccff", height: "1px" }
-            })
-          ])
+          _c(
+            "div",
+            { staticClass: "col-9" },
+            [_c(_vm.component, { tag: "component" })],
+            1
+          )
         ]
-      ),
-      _vm._v(" "),
-      _c(
-        "div",
-        { staticClass: "col-9" },
-        [_c(_vm.component, { tag: "component" })],
-        1
       )
-    ]
-  )
+    : _vm._e()
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -53793,7 +53884,7 @@ var render = function() {
       [
         _vm._m(0),
         _vm._v(" "),
-        _vm.itemai === null
+        _vm.itemai[0] == null
           ? _c("p", [_c("strong", [_vm._v("  Your cart is empty")])])
           : _vm._e(),
         _vm._v(" "),
@@ -53819,7 +53910,13 @@ var render = function() {
                     _c("br"),
                     _vm._v(
                       "Single unit price:  " +
-                        _vm._s(item.product.price) +
+                        _vm._s(
+                          Number(
+                            item.product.price *
+                              (1 + 0.01 * _vm.tax) *
+                              (1 - 0.01 * _vm.sale)
+                          ).toFixed(2)
+                        ) +
                         " € "
                     )
                   ]),
@@ -53883,7 +53980,14 @@ var render = function() {
                   _c("strong", [
                     _vm._v(
                       "Total: " +
-                        _vm._s(item.product.price * item.quantity) +
+                        _vm._s(
+                          Number(
+                            item.product.price *
+                              (1 + 0.01 * _vm.tax) *
+                              (1 - 0.01 * _vm.sale) *
+                              item.quantity
+                          ).toFixed(2)
+                        ) +
                         " €"
                     )
                   ]),
@@ -53976,7 +54080,20 @@ var render = function() {
           },
           [
             _c("strong", [_vm._v(" Price : ")]),
-            _vm._v(_vm._s(_vm.item.price) + "€"),
+            _vm._v(
+              _vm._s(
+                Number(
+                  _vm.item.price * (1 + 0.01 * _vm.tax) * (1 - 0.01 * _vm.sale)
+                ).toFixed(2)
+              ) +
+                "€ ( " +
+                _vm._s(
+                  Number(
+                    _vm.item.price * 0.01 * _vm.tax * (1 - 0.01 * _vm.sale)
+                  ).toFixed(2)
+                ) +
+                " € VAT)"
+            ),
             _c("br"),
             _vm._v(" "),
             _c("strong", [_vm._v("Units in stock : ")]),
@@ -54037,7 +54154,7 @@ var render = function() {
                   )
                 ]),
             _c("br"),
-            _vm._v(" "),
+            _vm._v(_vm._s(_vm.err1) + "\n            "),
             _c("strong", [_vm._v("Description : ")]),
             _vm._v(
               _vm._s(_vm.item.desc) + "\n           \n    \n       \n        "
@@ -54190,7 +54307,12 @@ var render = function() {
                             }
                           }
                         }),
-                        _vm._v("\nPrice (€)\n"),
+                        _c(
+                          "a",
+                          { staticStyle: { color: "red", display: "block" } },
+                          [_vm._v(" " + _vm._s(_vm.err1))]
+                        ),
+                        _vm._v("\nBase price (€)\n"),
                         _c("input", {
                           directives: [
                             {
@@ -54212,6 +54334,11 @@ var render = function() {
                             }
                           }
                         }),
+                        _c(
+                          "a",
+                          { staticStyle: { color: "red", display: "block" } },
+                          [_vm._v(" " + _vm._s(_vm.err4))]
+                        ),
                         _vm._v("\nDescription\n"),
                         _c("input", {
                           directives: [
@@ -54234,6 +54361,11 @@ var render = function() {
                             }
                           }
                         }),
+                        _c(
+                          "a",
+                          { staticStyle: { color: "red", display: "block" } },
+                          [_vm._v(" " + _vm._s(_vm.err2))]
+                        ),
                         _vm._v(" "),
                         _c("div", { staticClass: "d-inline-flex " }, [
                           _c(
@@ -54415,11 +54547,15 @@ var render = function() {
                           attrs: { type: "file" },
                           on: { change: _vm.imgfunc }
                         }),
-                        _c("br"),
+                        _c(
+                          "a",
+                          { staticStyle: { color: "red", display: "block" } },
+                          [_vm._v(" " + _vm._s(_vm.err3))]
+                        ),
                         _vm._v(" "),
                         _c("input", {
                           staticClass:
-                            "form-control mx-auto button btn-success",
+                            "form-control mx-auto my-5 button btn-success",
                           staticStyle: { width: "100px" },
                           attrs: { type: "submit", value: "Issaugoti" }
                         }),
@@ -54450,11 +54586,11 @@ var render = function() {
                           },
                           [
                             _vm._v(
-                              "\n              Dabartinis kiekis: " +
+                              "\n              Current stock: " +
                                 _vm._s(item.quantity)
                             ),
                             _c("br"),
-                            _vm._v("\nPrideti:"),
+                            _vm._v("\nIncrease by:"),
                             _c("input", {
                               directives: [
                                 {
@@ -54477,7 +54613,7 @@ var render = function() {
                               }
                             }),
                             _c("br"),
-                            _vm._v("\nAtimti:"),
+                            _vm._v("\nDecrease by:"),
                             _c("input", {
                               directives: [
                                 {
@@ -54499,14 +54635,32 @@ var render = function() {
                                 }
                               }
                             }),
-                            _c("br"),
+                            _vm.errstock == "Stock updated"
+                              ? _c(
+                                  "a",
+                                  {
+                                    staticStyle: {
+                                      color: "green",
+                                      display: "block"
+                                    }
+                                  },
+                                  [_vm._v(" " + _vm._s(_vm.errstock))]
+                                )
+                              : _c(
+                                  "a",
+                                  {
+                                    staticStyle: {
+                                      color: "red",
+                                      display: "block"
+                                    }
+                                  },
+                                  [_vm._v(" " + _vm._s(_vm.errstock))]
+                                ),
                             _vm._v(" "),
                             _c("input", {
-                              staticClass: "button form-control btn-success",
-                              attrs: {
-                                type: "submit",
-                                value: "Modifikuoti kieki"
-                              }
+                              staticClass:
+                                "button form-control my-3 btn-success",
+                              attrs: { type: "submit", value: "Modify stock" }
                             })
                           ]
                         )
@@ -54544,7 +54698,7 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", [_vm._v("Children")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Price")]),
+        _c("th", [_vm._v("Base price")]),
         _vm._v(" "),
         _c("th", [_vm._v(" Functions")])
       ])
@@ -54601,6 +54755,7 @@ var render = function() {
               }
             ],
             staticClass: "form-control",
+            staticStyle: { "min-width": "350px" },
             style: { border: _vm.BC },
             attrs: { type: "text", name: "usn" },
             domProps: { value: _vm.usn },
@@ -54613,8 +54768,15 @@ var render = function() {
               }
             }
           }),
-          _c("br"),
-          _vm._v("\r\n         \r\n" + _vm._s(_vm.err1) + "\r\n        "),
+          _vm._v(" "),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(_vm._s(_vm.err1))
+          ]),
+          _vm._v(" "),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(_vm._s(_vm.err4))
+          ]),
+          _vm._v(" "),
           _c("br"),
           _vm._v("\r\n                Password"),
           _c("br"),
@@ -54641,18 +54803,10 @@ var render = function() {
               }
             }
           }),
-          _c("br"),
-          _vm._v(
-            "\r\n        \r\n" + _vm._s(_vm.err3) + "\r\n                    "
-          )
+          _vm._v(" "),
+          _c("a", { staticStyle: { color: "red" } }, [_vm._v(_vm._s(_vm.err3))])
         ]),
         _vm._v(" "),
-        _c("br"),
-        _vm._v(
-          "\r\n                \r\n" +
-            _vm._s(_vm.err4) +
-            "\r\n                 "
-        ),
         _c("br"),
         _vm._v(" "),
         _c(
@@ -54782,20 +54936,41 @@ var render = function() {
           _vm._v(" "),
           _c(
             "tbody",
-            _vm._l(_vm.itemai, function(item) {
-              return _c("tr", { key: item.id }, [
-                _c("td", [_vm._v(_vm._s(item.created_at))]),
-                _vm._v(" "),
-                _c("td", [_vm._v(_vm._s(item.item.name))]),
-                _vm._v(" "),
-                _c("td", [_vm._v(_vm._s(item.quantity) + " pcs.")]),
-                _vm._v(" "),
-                _c("td", [_vm._v(_vm._s(item.address))]),
-                _vm._v(" "),
-                _c("td", [_vm._v(_vm._s(item.total) + " €")])
-              ])
-            }),
-            0
+            [
+              _vm._l(_vm.itemai, function(item) {
+                return _c("tr", { key: item.id }, [
+                  _c("td", [_vm._v(_vm._s(item.created_at))]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(item.item.name))]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(item.quantity) + " pcs.")]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(item.address))]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v(_vm._s(item.total) + " €")])
+                ])
+              }),
+              _vm._v(" "),
+              _c(
+                "tr",
+                {
+                  directives: [
+                    {
+                      name: "show",
+                      rawName: "v-show",
+                      value: _vm.itemai[0] == null,
+                      expression: "itemai[0]==null"
+                    }
+                  ]
+                },
+                [
+                  _c("td", { attrs: { colspan: "5" } }, [
+                    _vm._v(" You haven't made any purchases yet")
+                  ])
+                ]
+              )
+            ],
+            2
           )
         ]
       ),
@@ -54891,6 +55066,7 @@ var render = function() {
       _c(
         "form",
         {
+          staticStyle: { display: "block" },
           attrs: { enctype: "multipart/form-data" },
           on: {
             submit: function($event) {
@@ -54900,9 +55076,7 @@ var render = function() {
           }
         },
         [
-          _vm._v("\n        New product name:"),
-          _c("br"),
-          _vm._v(" "),
+          _vm._v("\n        New product name:\n      \n        "),
           _c("input", {
             directives: [
               {
@@ -54924,8 +55098,12 @@ var render = function() {
               }
             }
           }),
+          _vm._v(" "),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(" " + _vm._s(_vm.err1))
+          ]),
           _c("br"),
-          _vm._v("\n        New product price (€):"),
+          _vm._v("\n        New product's base price (€):"),
           _c("br"),
           _vm._v(" "),
           _c("input", {
@@ -54949,8 +55127,13 @@ var render = function() {
               }
             }
           }),
+          _vm._v(" "),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(" " + _vm._s(_vm.err2))
+          ]),
+          _vm._v(" "),
           _c("br"),
-          _vm._v("\n        Initial quantity:"),
+          _vm._v("Initial quantity:"),
           _c("br"),
           _vm._v(" "),
           _c("input", {
@@ -54974,8 +55157,13 @@ var render = function() {
               }
             }
           }),
+          _vm._v(" "),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(" " + _vm._s(_vm.err4))
+          ]),
+          _vm._v(" "),
           _c("br"),
-          _vm._v("\n        Categories:"),
+          _vm._v("Categories:"),
           _c("br"),
           _vm._v(" "),
           _c("div", { staticClass: "d-inline-flex" }, [
@@ -55115,8 +55303,12 @@ var render = function() {
             attrs: { type: "file", name: "fileToUpload", id: "fileToUpload" },
             on: { change: _vm.onImageChange }
           }),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(" " + _vm._s(_vm.errimg))
+          ]),
+          _vm._v(" "),
           _c("br"),
-          _vm._v("\nProduct description: "),
+          _vm._v("Product description: "),
           _c("br"),
           _vm._v(" "),
           _c("textarea", {
@@ -55139,10 +55331,13 @@ var render = function() {
               }
             }
           }),
+          _c("a", { staticStyle: { color: "red" } }, [
+            _vm._v(" " + _vm._s(_vm.err3))
+          ]),
           _c("br"),
           _vm._v(" "),
           _c("input", {
-            staticClass: "form-control button btn-success",
+            staticClass: "form-control my-4 button btn-success",
             attrs: { type: "submit", value: "Registruoti nauja produkta" }
           })
         ]
@@ -55321,22 +55516,45 @@ var render = function() {
         _vm._v(" "),
         _c(
           "tbody",
-          _vm._l(_vm.sales, function(order) {
-            return _c("tr", { key: order.id }, [
-              _c("td", [_vm._v(_vm._s(order.created_at))]),
-              _vm._v(" "),
-              _c("td", [_vm._v(_vm._s(order.item.id))]),
-              _vm._v(" "),
-              _c("td", [_vm._v(_vm._s(order.item.name))]),
-              _vm._v(" "),
-              _c("td", [_vm._v(_vm._s(order.quantity))]),
-              _vm._v(" "),
-              _c("td", [_vm._v(_vm._s(order.address))]),
-              _vm._v(" "),
-              _c("td", [_vm._v(_vm._s(order.account.usn))])
-            ])
-          }),
-          0
+          [
+            _c(
+              "tr",
+              {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: _vm.sales[0] == null,
+                    expression: "sales[0]==null"
+                  }
+                ]
+              },
+              [
+                _c("td", { attrs: { colspan: "7" } }, [
+                  _vm._v(" There haven't been any purchases yet ")
+                ])
+              ]
+            ),
+            _vm._v(" "),
+            _vm._l(_vm.sales, function(order) {
+              return _c("tr", { key: order.id }, [
+                _c("td", [_vm._v(_vm._s(order.created_at))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(order.item.id))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(order.item.name))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(order.quantity))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(order.address))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(order.account.usn))]),
+                _vm._v(" "),
+                _c("td", [_vm._v(_vm._s(order.Ship_name))])
+              ])
+            })
+          ],
+          2
         )
       ]),
       _vm._v(" "),
@@ -55363,7 +55581,9 @@ var staticRenderFns = [
         _vm._v(" "),
         _c("th", [_vm._v("Shipping address")]),
         _vm._v(" "),
-        _c("th", [_vm._v("Ordered by")])
+        _c("th", [_vm._v("Ordered by user")]),
+        _vm._v(" "),
+        _c("th", [_vm._v(" Recipient's name ")])
       ])
     ])
   }
@@ -55394,6 +55614,7 @@ var render = function() {
       "form",
       {
         staticClass: "mx-auto",
+        staticStyle: { display: "block" },
         on: {
           submit: function($event) {
             $event.preventDefault()
@@ -55447,7 +55668,10 @@ var render = function() {
             }
           }
         }),
-        _c("br"),
+        _vm._v(" "),
+        _c("a", { staticStyle: { color: "red", display: "block" } }, [
+          _vm._v(" " + _vm._s(_vm.err1))
+        ]),
         _vm._v("\nCarousel #1 ad Display image:"),
         _c("br"),
         _vm._v(" "),
@@ -55476,8 +55700,12 @@ var render = function() {
         }),
         _c("br"),
         _vm._v(" "),
+        _c("a", { staticStyle: { color: "red", display: "block" } }, [
+          _vm._v(" " + _vm._s(_vm.err2))
+        ]),
+        _vm._v(" "),
         _c("input", {
-          staticClass: "form-control my-1 button btn-success",
+          staticClass: "form-control my-5 button btn-success",
           attrs: { type: "submit", value: "Save settings" }
         })
       ]
@@ -55512,6 +55740,79 @@ var render = function() {
     _c(
       "div",
       {
+        staticClass: "text-center",
+        staticStyle: {
+          "background-color": "white",
+          display: "flex",
+          "justify-content": "center"
+        }
+      },
+      [
+        _c("button", { attrs: { disabled: "disabled" } }, [
+          _vm._v("Categories:")
+        ]),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "form-control",
+            staticStyle: { overflow: "hidden", "border-radius": "0px" },
+            on: {
+              click: function($event) {
+                _vm.cat = "All"
+              }
+            }
+          },
+          [_vm._v("All products ")]
+        ),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "form-control",
+            staticStyle: { overflow: "hidden", "border-radius": "0px" },
+            on: {
+              click: function($event) {
+                _vm.cat = "Mens"
+              }
+            }
+          },
+          [_vm._v(" Mens clothes ")]
+        ),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "form-control",
+            staticStyle: { overflow: "hidden", "border-radius": "0px" },
+            on: {
+              click: function($event) {
+                _vm.cat = "Womens"
+              }
+            }
+          },
+          [_vm._v(" Womens clothes ")]
+        ),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass: "form-control",
+            staticStyle: { overflow: "hidden", "border-radius": "0px" },
+            on: {
+              click: function($event) {
+                _vm.cat = "child"
+              }
+            }
+          },
+          [_vm._v(" Childrens clothing")]
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
         staticClass: "mb-5 mx-2",
         staticStyle: {
           display: "flex",
@@ -55542,7 +55843,15 @@ var render = function() {
                       _vm._v(" "),
                       _c("hr"),
                       _vm._v(
-                        "\r\n        \r\n        " + _vm._s(item.price) + " €"
+                        "\r\n        \r\n        " +
+                          _vm._s(
+                            Number(
+                              item.price *
+                                (1 + 0.01 * _vm.tax) *
+                                (1 - 0.01 * _vm.sale)
+                            ).toFixed(2)
+                          ) +
+                          " €"
                       ),
                       _c("br"),
                       _vm._v(" "),
@@ -58981,6 +59290,124 @@ if (inBrowser && window.Vue) {
 }
 
 /* harmony default export */ __webpack_exports__["default"] = (VueRouter);
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-session/index.js":
+/*!*******************************************!*\
+  !*** ./node_modules/vue-session/index.js ***!
+  \*******************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var STORAGE = null;
+var VueSession = {
+    key: 'vue-session-key',
+    flash_key: 'vue-session-flash-key',
+    setAll: function(all){
+        STORAGE.setItem(VueSession.key,JSON.stringify(all));
+    }
+}
+
+VueSession.install = function(Vue, options) {
+    if(options && 'persist' in options && options.persist) STORAGE = window.localStorage;
+    else STORAGE = window.sessionStorage;
+    Vue.prototype.$session = {
+        flash: {
+            parent: function(){
+                return Vue.prototype.$session;
+            },
+            get: function(key){
+                var all = this.parent().getAll();
+                var all_flash = all[VueSession.flash_key] || {};
+
+                var flash_value = all_flash[key];
+
+                this.remove(key);
+
+                return flash_value;
+            },
+            set: function(key, value){
+                var all = this.parent().getAll();
+                var all_flash = all[VueSession.flash_key] || {};
+
+                all_flash[key] = value;
+                all[VueSession.flash_key] = all_flash;
+
+                VueSession.setAll(all);
+            },
+            remove: function(key){
+                var all = this.parent().getAll();
+                var all_flash = all[VueSession.flash_key] || {};
+
+                delete all_flash[key];
+
+                all[VueSession.flash_key] = all_flash;
+                VueSession.setAll(all);
+            }
+        },
+        getAll: function(){
+            var all = JSON.parse(STORAGE.getItem(VueSession.key));
+            return all || {};
+        },
+        set: function(key,value){
+            if(key == 'session-id') return false;
+            var all = this.getAll();
+
+            if(!('session-id' in all)){
+                this.start();
+                all = this.getAll();
+            }
+
+            all[key] = value;
+
+            VueSession.setAll(all);
+        },
+        get: function(key){
+            var all = this.getAll();
+            return all[key];
+        },
+        start: function(){
+            var all = this.getAll();
+            all['session-id'] = 'sess:'+Date.now();
+
+            VueSession.setAll(all);
+        },
+        renew: function(sessionId){
+            var all = this.getAll();
+            all['session-id'] = 'sess:' + sessionId;
+            VueSession.setAll(all);
+        },
+        exists: function(){
+            var all = this.getAll();
+            return 'session-id' in all;
+        },
+        has: function(key){
+            var all = this.getAll();
+            return key in all;
+        },
+        remove: function(key){
+            var all = this.getAll();
+            delete all[key];
+
+            VueSession.setAll(all);
+        },
+        clear: function(){
+            var all = this.getAll();
+
+            VueSession.setAll({'session-id': all['session-id']});
+        },
+        destroy: function(){
+            VueSession.setAll({});
+        },
+        id: function(){
+            return this.get('session-id');
+        }
+    }
+};
+
+module.exports = VueSession;
 
 
 /***/ }),
@@ -71174,6 +71601,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var chart_js__WEBPACK_IMPORTED_MODULE_7___default = /*#__PURE__*/__webpack_require__.n(chart_js__WEBPACK_IMPORTED_MODULE_7__);
 /* harmony import */ var hchs_vue_charts__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! hchs-vue-charts */ "./node_modules/hchs-vue-charts/dist/vue-charts.min.js");
 /* harmony import */ var hchs_vue_charts__WEBPACK_IMPORTED_MODULE_8___default = /*#__PURE__*/__webpack_require__.n(hchs_vue_charts__WEBPACK_IMPORTED_MODULE_8__);
+/* harmony import */ var vue_session__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! vue-session */ "./node_modules/vue-session/index.js");
+/* harmony import */ var vue_session__WEBPACK_IMPORTED_MODULE_9___default = /*#__PURE__*/__webpack_require__.n(vue_session__WEBPACK_IMPORTED_MODULE_9__);
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 
@@ -71185,6 +71614,8 @@ __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 
 
+
+vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vue_session__WEBPACK_IMPORTED_MODULE_9___default.a);
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(window.VueCharts);
 var app = new vue__WEBPACK_IMPORTED_MODULE_0___default.a({
   el: '#shopas',
@@ -72198,8 +72629,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\xampp\htdocs\Portfolio\resources\js\app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! C:\xampp\htdocs\Portfolio\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\xampp\htdocs\portfolio\resources\js\app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! C:\xampp\htdocs\portfolio\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

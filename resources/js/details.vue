@@ -8,7 +8,7 @@
             </div>
 
             <div name="divas content" style="float:left;" class="ml-2   ">
-<strong> Price : </strong>{{item.price}}€<br>
+<strong> Price : </strong>{{Number(item.price*(1+(0.01*tax))*(1-(0.01*sale))).toFixed(2)}}€ ( {{Number(item.price*0.01*tax*(1-(0.01*sale))).toFixed(2)}} € VAT)<br>
              <strong>Units in stock : </strong>{{item.quantity}}<br>
             <div v-if="err3!==null">
              <i><strong>This item is already in your cart!</strong></i>
@@ -17,7 +17,7 @@
             <div v-else  >
                <div class="d-inline-flex my-2"> <div><button  class="button form-control w-auto" @click="orderQuant--">- </button></div><div class="my-auto">{{orderQuant}} pcs.</div><div> <button class="button w-auto form-control" @click="orderQuant++"> +</button></div>
                   </div> <br>  <button v-bind:disabled="but" class="button form-control btn-warning w-auto" @click="placeInCart()"> Add item to the cart </button>
-            </div><br>
+            </div><br>{{err1}}
             <strong >Description : </strong>{{item.desc}}
            
     
@@ -39,7 +39,9 @@ export default {
             but:false,
             err1:null,
             err2:null,
-            err3:''
+            err3:'',
+            tax:0,
+            sale:0
         }
     },
     created(){
@@ -58,8 +60,10 @@ export default {
            //  .then(text=>{console.log(text)})  
             .then(response=>{
                 console.log(response);
-                    this.item=response.inv;
-                    this.err3=response.err3;
+                    this.item=response.inv
+                    this.err3=response.err3
+                    this.tax=response.tax
+                    this.sale=response.sale
                     }
                 )
             .catch((e) => {

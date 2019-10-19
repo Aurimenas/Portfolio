@@ -1,5 +1,6 @@
 <template>
-<div class="row ml-2 my-3" style="height:100vh;min-width:525px;" >
+<div v-if="au===true" class="row ml-2 my-3" style="height:100vh;min-width:525px;" >  <!-- v-if="$session.get('id')=='1'" -->
+    
 <div class="col-2 text-center rounded mr-2" style="background-color:white;min-height:80%;min-width:120px;border:solid 2px #0a0a29;border-radius:2px;" >
     <br><strong style="font-size:25px;">Control Panel</strong><br><hr style="background-color:#141452;height:2px;border-radius:2px;">
     <div class=" text-center">
@@ -53,8 +54,19 @@ export default {
     },
     data(){
         return{
-        component:'stats'
+        component:'stats',
+        au:false
         }
+    },
+    created(){
+        axios.post('api/auth')
+        .then(response=>{
+            if(response.data.re==="Authenticated"){
+                this.au=true
+            }else{
+                window.location.href=''
+            }
+        })
     }
 }
 

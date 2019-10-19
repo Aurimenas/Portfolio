@@ -10,6 +10,8 @@ import axios from 'axios';
 
 import "chart.js";
 import "hchs-vue-charts";
+import VueSession from 'vue-session'
+Vue.use(VueSession)
 Vue.use(window.VueCharts);
 
 

@@ -10,6 +10,7 @@ use Illuminate\Session\Store;
 use Illuminate\Session\SessionManager;
 use App\Accounts;
 use Illuminate\Routing\ResponseFactory;
+use Illuminate\Support\Facades\Crypt;
 
 class logincontroller extends Controller
 {
@@ -38,14 +39,14 @@ class logincontroller extends Controller
             $err2="Please enter your password";
              } else {
         if($acc=Accounts::where('usn','=',$request->input('usn'))->first()){
-            if($acc->pwd==$request->input('pwd')){
+            if(Crypt::decryptString($acc->pwd)===$request->input('pwd')){
                 Session::token();
                 Session::put('id', $acc->id);
                 Session::put('grp', $acc->group);
                 Session::save();
                 $err6=Session('id');
                 $err5="Success";
-                
+               // return redirect(url('/'));
             }else
             { 
                 $err3="Incorrect password";
@@ -69,6 +70,7 @@ class logincontroller extends Controller
         $usn=$request->input('usn');
         $pwd1=$request->input('pwd1');
         $pwd2=$request->input('pwd2');
+      //  return response()->json(['err9'=> null, 'err8'=> $pwd1, 'err9'=> $pwd2,'usn'=>$usn]);
         $err6=null;
         $err7=null;
         $err8=null;
@@ -96,6 +98,7 @@ class logincontroller extends Controller
         Session::put('id',Accounts::count());
         Session::put('group','user');
         Session::save();
+      
         
     };
     return response()->json(['err6'=> $err6, 'err7'=> $err7, 'err8'=> $err8, 'err9'=> $err9]);
@@ -112,7 +115,7 @@ class logincontroller extends Controller
         $err3=null;
         $err4=null;
         $err5=null;
-        if($usr->pwd!==$ogpwd){
+        if(Crypt::decryptString($usr->pwd)!==$ogpwd){
             $err2="Incorrect password";
         };
         if(Accounts::where([['usn','=',$usn],['id','!=',$id]])->first())
@@ -131,8 +134,19 @@ class logincontroller extends Controller
             $account->updated_at=NOW();
            // $account->created_at=NOW();
             $account->save();
-            $err5="success";
+            $err5="Account info updated";
+            
+           
         };
         return response()->json(['err1'=>$err1,'err2'=>$err2,'err3'=>$err3,'err4'=>$err4,'err5'=>$err5]);
+    }
+
+    public function auth(){
+        if(session('grp')==="Admin"){
+            $res="Authenticated";
+        }else{
+            $res="Redir";
+        };
+        return response()->json(['re'=>$res]);
     }
 }

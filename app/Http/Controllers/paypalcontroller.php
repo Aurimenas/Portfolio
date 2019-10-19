@@ -15,6 +15,7 @@ use PayPal\Api\PaymentExecution;
 use App\Sales;
 use App\Cart;
 use App\Inventory;
+use App\Settings;
 
 class paypalcontroller extends Controller
 {
@@ -22,11 +23,20 @@ class paypalcontroller extends Controller
         //create sales record in db with received payment id
         $apiContext = new \PayPal\Rest\ApiContext(
             new \PayPal\Auth\OAuthTokenCredential(
-                'AQYYDrkY3MXeA4WoO18AijNfz0zl8OjGm0rb4ebRGeOb-7MmLjuxw0Ca-fuu84zfz3QtTXF8QRlUExU6',     // ClientID
-                'EJvkf7ozTWaRszICRjw_Nx765r5p7hO6aADls7NqxPHZpO7Sp89r2oSWHSQQtjmNJhX0B_dAnXQG91fU'      // ClientSecret
+                'AbcedH8FfMJ26n8Pgl7xviHKz8WSFk4BnYGLb9WIU1d4fsfiA61KN3eDzHvx1m9fsTr1gFtdk-S488vJ',     // ClientID
+                'EPWBriDYq1emp6J0BSGYhvyeou0b21UFFlaCiYCSKyhiD1ZiUqNUc05LbxbVlg7PCL7zoxP1Obt5iYaP'      // ClientSecret
             )
     );
-        
+    $apiContext->setConfig(
+        array(
+         
+          'mode' => 'live'
+
+        )
+  );
+    $sale=Settings::find(1)->globalSale;
+    $tax=Settings::find(1)->tax;
+
         $payer = new Payer();
         $payer->setPaymentMethod("paypal");
 
@@ -42,7 +52,7 @@ class paypalcontroller extends Controller
               $Sale->quantity=$cart->quantity;
               $Sale->address="-";
              $Sale->email="-";
-             $Sale->total=$cart->quantity*$cart->product->price; //cart->item.price*cart->quantity
+             $Sale->total=$cart->quantity*round($cart->product->price*(1+(0.01*$tax))*(1-(0.01*$sale)),2); //cart->item.price*cart->quantity
               $Sale->Status="0";
               $Sale->created_at=NOW();
               $Sale->updated_at=NOW();
@@ -56,10 +66,10 @@ class paypalcontroller extends Controller
           
             $items[$index] = new Item();
             $items[$index]->setName($cart->product->name)
-                 ->setCurrency('USD')
+                 ->setCurrency('EUR')
                  ->setSku($cart->product->id)
                  ->setQuantity($cart->quantity)
-                 ->setPrice($cart->product->price);
+                 ->setPrice(round($cart->product->price*(1+(0.01*$tax))*(1-(0.01*$sale)),2));
                  $index++;
                 
           };
@@ -87,7 +97,7 @@ class paypalcontroller extends Controller
 
 
         $amount = new Amount();
-        $amount->setCurrency("USD")
+        $amount->setCurrency("EUR")
             ->setTotal($totalas)
             ->setDetails($details);
         
@@ -129,10 +139,17 @@ class paypalcontroller extends Controller
       //  if (isset($request->input('success')) && $request->input('success')=='true') {
         $apiContext = new \PayPal\Rest\ApiContext(
             new \PayPal\Auth\OAuthTokenCredential(
-                'AQYYDrkY3MXeA4WoO18AijNfz0zl8OjGm0rb4ebRGeOb-7MmLjuxw0Ca-fuu84zfz3QtTXF8QRlUExU6',     // ClientID
-                'EJvkf7ozTWaRszICRjw_Nx765r5p7hO6aADls7NqxPHZpO7Sp89r2oSWHSQQtjmNJhX0B_dAnXQG91fU'      // ClientSecret
+                'AbcedH8FfMJ26n8Pgl7xviHKz8WSFk4BnYGLb9WIU1d4fsfiA61KN3eDzHvx1m9fsTr1gFtdk-S488vJ',     // ClientID
+                'EPWBriDYq1emp6J0BSGYhvyeou0b21UFFlaCiYCSKyhiD1ZiUqNUc05LbxbVlg7PCL7zoxP1Obt5iYaP'      // ClientSecret
             )
     );
+    $apiContext->setConfig(
+        array(
+     
+          'mode' => 'live'
+    
+        )
+  );
                 $paymentId = $_GET['paymentId'];
                 $payment = Payment::get($paymentId, $apiContext);
      
@@ -154,7 +171,7 @@ class paypalcontroller extends Controller
                     ->setTax(0)
                     ->setSubtotal($totalas);
             
-                $amount->setCurrency('USD');
+                $amount->setCurrency('EUR');
                 $amount->setTotal($totalas);
                 $amount->setDetails($details);
                 $transaction->setAmount($amount);

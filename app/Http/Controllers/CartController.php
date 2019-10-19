@@ -10,6 +10,7 @@ use App\Http\Requests;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Session\Store;
 use Illuminate\Session\SessionManager;
+use App\Settings;
 
 class CartController extends Controller
 {
@@ -17,7 +18,9 @@ class CartController extends Controller
         $id=session('id');
         //$cart=Cart::where('user_id','=',$id)->with('product')->get();
         $cart=Cart::where('user_id','=',$id)->with('product')->get();
-        return CartRes::collection($cart);
+        $sale=Settings::find(1)->globalSale;
+        $tax=Settings::find(1)->tax;
+        return response()->json(['cart'=>$cart,'tax'=>$tax,'sale'=>$sale]);
     }
     public function addtocart(request $request){
         $err1=null;

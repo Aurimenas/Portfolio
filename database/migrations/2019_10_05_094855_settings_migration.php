@@ -15,7 +15,6 @@ class SettingsMigration extends Migration
     {
         Schema::create('Settings', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('showSale');
             $table->integer('globalSale');
             $table->integer('tax');
             $table->string('car1');
