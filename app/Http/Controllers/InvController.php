@@ -101,7 +101,7 @@ class InvController extends Controller
             $decoded=base64_decode($explode[1]);
            
             $filename=rand().time().'.'.$ext;
-            $path=public_path().'\storage\img\\'.$filename;
+            $path=public_path().'/storage/img/'.$filename;
             file_put_contents($path,$decoded);
             
         };

@@ -13,7 +13,7 @@ class CartMigration extends Migration
      */
     public function up()
     {
-        Schema::create('Cart', function (Blueprint $table) {
+        Schema::create('cart', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('user_id');
             $table->integer('product_id');

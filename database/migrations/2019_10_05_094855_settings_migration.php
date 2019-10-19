@@ -13,7 +13,7 @@ class SettingsMigration extends Migration
      */
     public function up()
     {
-        Schema::create('Settings', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->integer('globalSale');
             $table->integer('tax');
