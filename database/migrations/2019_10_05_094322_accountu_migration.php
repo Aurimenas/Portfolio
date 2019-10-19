@@ -13,7 +13,7 @@ class AccountuMigration extends Migration
      */
     public function up()
     {
-        Schema::create('Accounts', function (Blueprint $table) {
+        Schema::create('accounts', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('usn');
             $table->string('group');
