@@ -5,7 +5,7 @@ Run php artisan commands to generate the db structure (php artisan migrate:fresh
 To set up your store's paypal payments to go to your account, change the id and secret, provided by paypal, in both transaction creation and execution functions, which are stored in App\paypalcontroller.php
 From there the setup is complete, so you can visit your site on the browser and start using it :) !
 
-*PS. If you want to see how stats graph displays sales data, you might want to manually add mock data into your db (the delimeters are columns 'total' and 'created at') since the only other way to generate new sales records is to execute actual paypal payments.*
+*PS. If you want to see how stats graph displays sales data, you might want to manually add mock data into your db (the delimeters are columns 'total' and 'created_at') since the only other way to generate new sales records is to execute actual paypal payments.*
 
 # To-Dos
 To consider this app fully production ready there are few minor details that need to be tweaked/optimised:
