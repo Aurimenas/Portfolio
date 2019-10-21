@@ -1,5 +1,6 @@
 # How to Use
-Upload the entire repo to your server, in .env file, change the databse name and creditentials to your db's,
+
+Visit live version at https://www.aurimoportfolio.com or upload the entire repo to your server, in .env file, change the databse name and creditentials to your db's,
 Run php artisan commands to generate the db structure (php artisan migrate:fresh --seed) with the seed that will generate an administrator's account. The created account will have the username "Administrator" and a temporary password "temporary123" (You can change both in the account settings tab). 
 
 To set up your store's paypal payments to go to your account, change the id and secret, provided by paypal, in both transaction creation and execution functions, which are stored in App\paypalcontroller.php
