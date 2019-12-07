@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{csrf_token()}}">
         <script> window.Laravel = {csrfToken: '{{csrf_token()}}'}</script>
-        <title>Laravel</title>
+        <title>Aurimo portfolio mock-up shop</title>
 
         <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
         <!--custom css -->

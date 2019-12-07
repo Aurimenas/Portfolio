@@ -23,7 +23,7 @@ class SalesController extends Controller
 
     public function give(){
         //returns the entire list of sales ordred by new
-        $sales=Sales::orderBy('created_at','DESC')->with('item')->with('account')->get();
+        $sales=Sales::where('status','=',1)->orderBy('created_at','DESC')->with('item')->with('account')->get();
         return SalesRes::collection($sales);
     }
 
